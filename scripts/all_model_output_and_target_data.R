@@ -10,7 +10,7 @@ all_data <- list()
 required_columns <- c("sarscov2_pct_positive", "rsv_pct_positive", "flu_pct_positive")
 
 # Loop through the seasons
-for (year in 2019:2024) {
+for (year in 2019:2025) {
   season_folder <- paste0("auxiliary-data/target-data-archive/season_", year, "_", year + 1)
   file_path <- file.path(season_folder, "target_rvdss_data.csv")
   
@@ -33,20 +33,24 @@ for (year in 2019:2024) {
     all_data[[length(all_data) + 1]] <- data
   } else {
     warning(paste("File not found:", file_path))
-    data <- read.csv('target-data/season_2024_2025/target_rvdss_data.csv', stringsAsFactors = FALSE)
+    data <- read.csv('target-data/season_2025_2026/target_rvdss_data.csv', stringsAsFactors = FALSE)
     
     # Add a season column for reference
     data$Season <- paste0(year, "-", year + 1)
     
     # Append the data to the list
     all_data[[length(all_data) + 1]] <- data
-    print("File found at: target-data/season_2024_2025/target_rvdss_data.csv")
+    print("File found at: target-data/season_2025_2026/target_rvdss_data.csv")
     
   }
 }
 
 # Combine all data frames, ensuring all columns are included
 final_data <- bind_rows(all_data)
+
+final_data <- final_data |>
+  mutate(geo_value = if_else(geo_value == "yk", "yt", geo_value))
+
 
 # Write the combined data to a new CSV file
 write.csv(final_data, "auxiliary-data/concatenated_rvdss_data.csv", row.names = FALSE)
@@ -90,8 +94,11 @@ all_model_data <- bind_rows(
   lapply(list.dirs(model_output_dir, full.names = TRUE, recursive = FALSE), process_model_dir)
 )
 
+cutoff_date <- as_date("2025-08-30")
+
 all_model_data <- all_model_data %>%
-  mutate(value = ifelse(value < 0, 0, round(value, 2)))
+  mutate(value = ifelse(value < 0, 0, round(value, 2))) |>
+  filter(reference_date >= cutoff_date)
 
 # Save the combined data to a CSV file
 write_csv(all_model_data, "auxiliary-data/concatenated_model_output.csv")
