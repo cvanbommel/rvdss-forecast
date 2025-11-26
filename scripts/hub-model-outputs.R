@@ -105,5 +105,6 @@ ensemble_file_path <- create_file_path(ensemble_output_dir, ensemble_file_name)
 ensemble <- ensemble |>
   select(-model_id)
 
+ensemble
 if (!dir.exists(ensemble_output_dir)) dir.create(ensemble_output_dir, recursive = TRUE)
 write.csv(ensemble, ensemble_file_path, row.names = FALSE)

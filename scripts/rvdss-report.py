@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings("ignore")
@@ -10,7 +11,7 @@ warnings.filterwarnings("ignore")
 model_data = pd.read_csv('auxiliary-data/concatenated_model_output.csv')
 
 # Load the truth data
-truth_data = pd.read_csv('target-data/season_2024_2025/target_rvdss_data.csv')
+truth_data = pd.read_csv('target-data/season_2025_2026/target_rvdss_data.csv')
 truth_data = truth_data.rename(columns={"time_value": "time"})
 truth_data['time'] = pd.to_datetime(truth_data['time']).dt.date
 
@@ -24,6 +25,7 @@ print(truth_data)
 # Calculate reference date
 current_date = datetime.now().date()
 ref_date = current_date + timedelta(days=(6 - current_date.weekday())) - timedelta(days=1, weeks=1)
+print(ref_date)
 
 # Filter model data for the reference date
 model_data = model_data[model_data['reference_date'] == ref_date]
@@ -66,6 +68,12 @@ with PdfPages(file_name) as pdf:
             
             # Create figure with two subplots
             fig, axes = plt.subplots(1, 2, figsize=(13, 5), sharey=True)
+
+            for ax in axes:
+                # format x axis as '15 Nov'
+                ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
+                ax.tick_params(axis="x")  # optional - improve readability
+
 
             ref_yaxis = region_data[region_data['output_type_id'] == 0.5]
 
@@ -139,7 +147,8 @@ with PdfPages(file_name) as pdf:
                 )
             else:
                 print(f"No truth data for region: {region}")
-
+            print(locations)
+            print(region)
             full_region_name = locations[locations['geo_abbr']==region]['geo_name'].values[0]
             ax.set_title(f"Forecasting Models - {full_region_name} - {target}")
             ax.set_xlabel("Target End Date")
