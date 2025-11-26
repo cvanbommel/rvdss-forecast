@@ -3,9 +3,11 @@ name: Update RVDSS Data
 on:
   workflow_dispatch:
   schedule:
-    # Updates are ~3pm EDT (UTC-4 or UTC-5)
-    # So 21:00 UTC for safety
-    - cron: '0 21 * * THU'
+    # friday 11:00 america/toronto (16:00 utc during standard time)
+    - cron: '0 16 * * FRI'
+    # friday 15:00 america/toronto (20:00 utc during standard time)
+    - cron: '0 20 * * FRI'
+
 
 jobs:
   build:
